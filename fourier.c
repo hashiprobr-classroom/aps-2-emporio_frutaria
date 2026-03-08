@@ -36,21 +36,40 @@ void nft_inverse(complex t[], complex s[], int n) {
 }
 
 void fft(complex s[], complex t[], int n, int sign) {
-    complex sp[n/2], si[n/2];
-    int j = 0;
-    int k = 0;
-
-    for (int i=0; i<n; i++) {
-        if (i % 2 == 0) {
-            sp[j] = s[i];
-            j++;
-        } else {
-            si[k] = s[i];
-            k++;
-        }
+    
+    if (n==1){
+        t[0] = s[0];
+        return;
     }
 
-    complex tp[n/2], ti[n/2];
+    int metade = n / 2;
+    complex sp[metade];
+    complex si[metade];
+
+    for (int i = 0; i < metade; i++){
+        sp[i] = s[i*2];
+        si[i] = s[i*2 + 1];
+
+    }
+
+    complex tp[metade];
+    complex ti[metade];
+
+    fft(sp, tp, metade, sign);
+    fft(si, ti, metade, sign);
+
+    for (int k = 0; k < metade; k++){
+        double x = sign * 2 * PI * k / n;
+        
+        double term_a = ti[k].a * cos(x) - ti[k].b * sin(x);
+        double term_b = ti[k].a * sin(x) + ti[k].b * cos(x);
+
+        t[k].a = tp[k].a + term_a;
+        t[k].b = tp[k].b + term_b;
+
+        t[k + n / 2].a = tp[k].a - term_a;
+        t[k + n / 2].b = tp[k].b - term_b;
+    }
 
     
 }
